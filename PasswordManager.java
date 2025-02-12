@@ -50,37 +50,36 @@ public class PasswordManager {
             }
             try {
                 writer = new FileWriter("password.txt");
+                System.out.println("No password file detected. Creating a new password file.");
+                // create key
+                // store salt
+                String option = "";
+
+                while(!option.equals("q")) {
+                    System.out.println("a : Add Password \n r : Read Password \n q : Quit");
+                    System.out.print("Enter choice: ");
+                    option = scanner.nextLine();
+                    switch(option) {
+                        case "a":
+                            break;
+
+                        case "r":
+                            break;
+
+                        case "q":
+                            System.out.println("Quitting");
+                            System.exit(0);
+                            break;
+
+                        default:
+                            System.out.println("Error: Invalid input");
+                            break;
+                    }
+                }
                 writer.write("hello");
                 writer.close();
             } catch (Exception e) {
                 
-            }
-            
-            System.out.println("No password file detected. Creating a new password file.");
-            // create key
-            // store salt
-            String option = "";
-
-            while(!option.equals("q")) {
-                System.out.println("a : Add Password \n r : Read Password \n q : Quit");
-                System.out.print("Enter choice: ");
-                option = scanner.nextLine();
-                switch(option) {
-                    case "a":
-                        break;
-
-                    case "r":
-                        break;
-
-                    case "q":
-                        System.out.println("Quitting");
-                        System.exit(0);
-                        break;
-
-                    default:
-                        System.out.println("Error: Invalid input");
-                        break;
-                }
             }
         }
     }

@@ -3,17 +3,17 @@ import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Base64;
 import java.util.Scanner;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.Base64;
 
 public class PasswordManager {
 
@@ -44,16 +44,18 @@ public class PasswordManager {
 
         else {
             // creating a new file
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
+            // try {
+            //     file.createNewFile();
+            // } catch (Exception e) {
                 
-            }
+            // }
+            createPasswordFile(passcode);
             try {
                 writer = new FileWriter("password.txt");
                 System.out.println("No password file detected. Creating a new password file.");
                 // create key
                 // store salt
+                // writer.write(createpasswordFile(passcode));
                 String option = "";
 
                 while(!option.equals("q")) {
@@ -120,6 +122,19 @@ public class PasswordManager {
         String firstLine = new String(encodedBytes, StandardCharsets.UTF_8) + ":" + verificationToken;
 
         // create password.txt file
+        Path defaultDir = Paths.get("").toAbsolutePath();
+        File directory = new File(defaultDir.toString());
+        File file = new File(directory, "password.txt");
+        try {
+            file.createNewFile();
+        } catch (Exception e) {
+        }
+        try {
+            FileWriter writer = new FileWriter("password.txt");
+            writer.write(firstLine);
+            writer.close();
+        } catch (Exception e) {
+        }
 
         // write firstLine to password.txt
     }

@@ -51,7 +51,7 @@ public class PasswordManager {
             // }
             createPasswordFile(passcode);
             try {
-                writer = new FileWriter("password.txt");
+                //writer = new FileWriter("password.txt");
                 System.out.println("No password file detected. Creating a new password file.");
                 // create key
                 // store salt
@@ -59,7 +59,7 @@ public class PasswordManager {
                 String option = "";
 
                 while(!option.equals("q")) {
-                    System.out.println("a : Add Password \n r : Read Password \n q : Quit");
+                    System.out.println("a : Add Password \nr : Read Password \nq : Quit");
                     System.out.print("Enter choice: ");
                     option = scanner.nextLine();
                     switch(option) {
@@ -79,8 +79,6 @@ public class PasswordManager {
                             break;
                     }
                 }
-                writer.write("hello");
-                writer.close();
             } catch (Exception e) {
                 
             }
@@ -127,10 +125,8 @@ public class PasswordManager {
         File file = new File(directory, "password.txt");
         try {
             file.createNewFile();
-        } catch (Exception e) {
-        }
-        try {
             FileWriter writer = new FileWriter("password.txt");
+            System.out.println(firstLine);
             writer.write(firstLine);
             writer.close();
         } catch (Exception e) {

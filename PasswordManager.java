@@ -33,29 +33,23 @@ public class PasswordManager {
         boolean exists = file.exists() && file.isFile();
 
         // If a file already exists in the default directory
-        FileWriter writer;
         if(exists) {
             try {
-                writer = new FileWriter("password.txt");
+                FileWriter writer = new FileWriter("password.txt", true);
             } catch (Exception e) {
-
             }
         }
 
         else {
             // creating a new file
-            // try {
-            //     file.createNewFile();
-            // } catch (Exception e) {
-                
-            // }
+            // creating the salt and verification token
+            // writing those into the first line
             createPasswordFile(passcode);
             try {
-                //writer = new FileWriter("password.txt");
+                FileWriter writer = new FileWriter("password.txt", true);
+                writer.write("hello");
+                writer.close();
                 System.out.println("No password file detected. Creating a new password file.");
-                // create key
-                // store salt
-                // writer.write(createpasswordFile(passcode));
                 String option = "";
 
                 while(!option.equals("q")) {
@@ -114,20 +108,18 @@ public class PasswordManager {
         String firstLine = new String(salt, StandardCharsets.UTF_8) + ":" + verificationToken;
 
         // create password.txt file
+        // write firstLine to password.txt
         Path defaultDir = Paths.get("").toAbsolutePath();
         File directory = new File(defaultDir.toString());
         File file = new File(directory, "password.txt");
         try {
             file.createNewFile();
-            FileWriter writer = new FileWriter("password.txt");
-            System.out.println(firstLine);
-            writer.write(firstLine);
+            FileWriter writer = new FileWriter("password.txt", true);
+            writer.write(firstLine + "\n");
             writer.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        // write firstLine to password.txt
     }
 
     // generates a random salt string

@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -112,10 +113,15 @@ public class PasswordManager {
         // encrypt "verify" to create verification token
         String verificationToken = encrypt(verificationString, key);
 
-        // write the salt & verificationToken to password.txt
-        // (just print it out for now)
-        System.out.println("salt: " + salt);
-        System.out.println("verification token: " + verificationToken);
+        // store the salt string in base64
+        byte[] encodedBytes = Base64.getEncoder().encode(salt.getBytes(StandardCharsets.UTF_8));
+
+        // combine the salt and verification token into one line
+        String firstLine = new String(encodedBytes, StandardCharsets.UTF_8) + ":" + verificationToken;
+
+        // create password.txt file
+
+        // write firstLine to password.txt
     }
 
     // generates a random salt string

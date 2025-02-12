@@ -2,20 +2,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.util.Scanner;
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
+import java.util.Scanner;
+import javax.crypto.*;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class PasswordManager {
 
@@ -46,10 +41,26 @@ public class PasswordManager {
             // writing those into the first line
             System.out.println("No password file detected. Creating a new password file.");
             createPasswordFile(passcode);
+            String verificationToken;
             try {
-                FileWriter writer = new FileWriter("password.txt", true);
-            } catch (Exception e) {
+                // open password.txt & read the first line
+                BufferedReader reader = new BufferedReader(new FileReader("password.txt"));
+                String line = reader.readLine();
+
+                // check for empty password.txt
+                if(line == null)
+                    throw new RuntimeException("password.txt is empty");
+
+                // split the salt & verification token using ":"
+                String[] items = line.split(":");
+                salt = Base64.getDecoder().decode(items[0].getBytes());;
+                verificationToken = items[1];
+            }catch(Exception e){
+                throw new RuntimeException(e);
             }
+
+            // generate a key from passcode
+            privateKey = hash(passcode, salt);
         }else{ // verify the passcode entered
             String verificationToken;
             try {
@@ -87,7 +98,7 @@ public class PasswordManager {
             if(decrypted.equals(verificationString)){
                 System.out.println("key matches!!!!");
             }else{
-                System.out.println("key does not matches!!! :(");
+                System.out.println("key does not match!!! :(");
             }
         }
 
@@ -101,9 +112,13 @@ public class PasswordManager {
                 option = scanner.nextLine();
                 switch(option) {
                     case "a":
+                        // For Hilary to do
                         break;
 
                     case "r":
+                        System.out.print("Enter label for password: ");
+                        String label = scanner.nextLine();
+                        System.out.println("Found: " + readPassword(label, privateKey));
                         break;
 
                     case "q":
@@ -203,5 +218,22 @@ public class PasswordManager {
         }catch(Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    // reads the specified password based on the password label
+    private static String readPassword(String label, SecretKey privateKey) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("password.txt"));
+            String line = br.readLine();
+            while(line != null) {
+                String[] textLine = line.split(":", 2);
+                if(textLine[0].equals(label)) {
+                    return decrypt(textLine[1], privateKey);
+                }
+                line = br.readLine();
+            }
+        } catch (Exception e) {
+        }
+        return "Error: invalid label";
     }
 }

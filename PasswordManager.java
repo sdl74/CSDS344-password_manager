@@ -33,49 +33,44 @@ public class PasswordManager {
         boolean exists = file.exists() && file.isFile();
 
         // If a file already exists in the default directory
-        if(exists) {
+        if(!exists) {
+            // creating a new file
+            // creating the salt and verification token
+            // writing those into the first line
+            System.out.println("No password file detected. Creating a new password file.");
+            createPasswordFile(passcode);
             try {
                 FileWriter writer = new FileWriter("password.txt", true);
             } catch (Exception e) {
             }
         }
 
-        else {
-            // creating a new file
-            // creating the salt and verification token
-            // writing those into the first line
-            createPasswordFile(passcode);
-            try {
-                FileWriter writer = new FileWriter("password.txt", true);
-                writer.write("hello");
-                writer.close();
-                System.out.println("No password file detected. Creating a new password file.");
-                String option = "";
+        try {
+            FileWriter writer = new FileWriter("password.txt", true);
+            String option = "";
 
-                while(!option.equals("q")) {
-                    System.out.println("a : Add Password \nr : Read Password \nq : Quit");
-                    System.out.print("Enter choice: ");
-                    option = scanner.nextLine();
-                    switch(option) {
-                        case "a":
-                            break;
+            while(!option.equals("q")) {
+                System.out.println("a : Add Password \nr : Read Password \nq : Quit");
+                System.out.print("Enter choice: ");
+                option = scanner.nextLine();
+                switch(option) {
+                    case "a":
+                        break;
 
-                        case "r":
-                            break;
+                    case "r":
+                        break;
 
-                        case "q":
-                            System.out.println("Quitting");
-                            System.exit(0);
-                            break;
+                    case "q":
+                        System.out.println("Quitting");
+                        System.exit(0);
+                        break;
 
-                        default:
-                            System.out.println("Error: Invalid input");
-                            break;
-                    }
+                    default:
+                        System.out.println("Error: Invalid input");
+                        break;
                 }
-            } catch (Exception e) {
-                
             }
+        } catch (Exception e) {
         }
     }
 

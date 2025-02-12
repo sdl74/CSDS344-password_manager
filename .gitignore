@@ -22,3 +22,8 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# extra stuff to ignore so literally only the java class file is in the repo
+*.iml
+*.xml
+.idea/*

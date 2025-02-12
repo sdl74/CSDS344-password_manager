@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -42,6 +44,46 @@ public class PasswordManager {
             try {
                 FileWriter writer = new FileWriter("password.txt", true);
             } catch (Exception e) {
+            }
+        }else{ // verify the passcode entered
+            String verificationToken;
+            byte[] salt;
+            try {
+                // open password.txt & read the first line
+                BufferedReader reader = new BufferedReader(new FileReader("password.txt"));
+                String line = reader.readLine();
+
+                // check for empty password.txt
+                if(line == null)
+                    throw new RuntimeException("password.txt is empty");
+
+                // split the salt & verification token using ":"
+                String[] items = line.split(":");
+                salt = Base64.getDecoder().decode(items[0].getBytes());;
+                verificationToken = items[1];
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+
+            // generate key from passcode
+            SecretKey privateKey = hash(passcode, salt);
+
+            // decrypt verifictaion token using salt & passcode
+            String decrypted;
+            try {
+                decrypted = decrypt(verificationToken, privateKey);
+            }catch(Exception e){
+                // decryption failed : assume incorrect password was given
+                System.out.println("password does not match, quitting");
+                System.exit(0);
+                return;
+            }
+
+            // confirm verification token is valid
+            if(decrypted.equals(verificationString)){
+                System.out.println("key matches!!!!");
+            }else{
+                System.out.println("key does not matches!!! :(");
             }
         }
 
@@ -100,7 +142,7 @@ public class PasswordManager {
         String verificationToken = encrypt(verificationString, key);
 
         // combine the salt and verification token into one line
-        String firstLine = new String(salt, StandardCharsets.UTF_8) + ":" + verificationToken;
+        String firstLine = Base64.getEncoder().encodeToString(salt) + ":" + verificationToken;
 
         // create password.txt file
         // write firstLine to password.txt

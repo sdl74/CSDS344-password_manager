@@ -1,3 +1,7 @@
+// sdl74  Samuel David Lovvoll
+// sxk1843 Steve Kim
+// hxk754  Hilary Kim
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -41,11 +45,13 @@ public class PasswordManager {
             // writing those into the first line
             System.out.println("No password file detected. Creating a new password file.");
             createPasswordFile(passcode);
+            @SuppressWarnings("unused")
             String verificationToken;
             try {
                 // open password.txt & read the first line
                 BufferedReader reader = new BufferedReader(new FileReader("password.txt"));
                 String line = reader.readLine();
+                reader.close();
 
                 // check for empty password.txt
                 if(line == null)
@@ -55,6 +61,7 @@ public class PasswordManager {
                 String[] items = line.split(":");
                 salt = Base64.getDecoder().decode(items[0].getBytes());;
                 verificationToken = items[1];
+                reader.close();
             }catch(Exception e){
                 throw new RuntimeException(e);
             }
@@ -67,7 +74,7 @@ public class PasswordManager {
                 // open password.txt & read the first line
                 BufferedReader reader = new BufferedReader(new FileReader("password.txt"));
                 String line = reader.readLine();
-
+                reader.close();
                 // check for empty password.txt
                 if(line == null)
                     throw new RuntimeException("password.txt is empty");
@@ -91,6 +98,7 @@ public class PasswordManager {
                 // decryption failed : assume incorrect password was given
                 System.out.println("password does not match, quitting");
                 System.exit(0);
+                scanner.close();
                 return;
             }
 
@@ -103,7 +111,6 @@ public class PasswordManager {
         }
 
         try {
-            FileWriter writer = new FileWriter("password.txt", true);
             String option = "";
 
             while(!option.equals("q")) {
@@ -112,17 +119,22 @@ public class PasswordManager {
                 option = scanner.nextLine();
                 switch(option) {
                     case "a":
-                        // For Hilary to do
+                        System.out.print("Enter label for password: ");
+                        String labelA = scanner.nextLine();
+                        System.out.println("Enter password to store: ");
+                        String newPassword = scanner.nextLine();
+                        addPassword(labelA, newPassword, privateKey);
                         break;
 
                     case "r":
                         System.out.print("Enter label for password: ");
-                        String label = scanner.nextLine();
-                        System.out.println("Found: " + readPassword(label, privateKey));
+                        String labelR = scanner.nextLine();
+                        System.out.println("Found: " + readPassword(labelR, privateKey));
                         break;
 
                     case "q":
                         System.out.println("Quitting");
+                        scanner.close();
                         System.exit(0);
                         break;
 
@@ -223,6 +235,7 @@ public class PasswordManager {
     // reads the specified password based on the password label
     private static String readPassword(String label, SecretKey privateKey) {
         try {
+            @SuppressWarnings("resource")
             BufferedReader br = new BufferedReader(new FileReader("password.txt"));
             String line = br.readLine();
             while(line != null) {
@@ -232,8 +245,47 @@ public class PasswordManager {
                 }
                 line = br.readLine();
             }
+            br.close();
         } catch (Exception e) {
         }
         return "Error: invalid label";
     }
+
+    // searches for the inputted label, and replaces the password with the new one
+    // if the label is not already present, writes a new line with the lable and password
+    private static boolean addPassword(String label, String newPassword, SecretKey privateKey) {
+        try {
+            @SuppressWarnings("resource")
+            BufferedReader reader = new BufferedReader(new FileReader("password.txt"));
+            String newFile = "";
+            String line = reader.readLine();
+            boolean isReplace = false;
+
+            while(line != null) {
+                String[] textLine = line.split(":", 2);
+                // if the current line has the label that is being changed, replace the password with the new one (encrypted)
+                if(!textLine[0].equals(label)) {
+                    newFile = newFile + (textLine[0] + ":" + textLine[1] + "\n");
+                }
+                else {
+                    newFile = newFile + (label + ":" + encrypt(newPassword, privateKey) + "\n");
+                    isReplace = true;
+                }
+                line = reader.readLine();
+            }
+            // the new password's label is not already present
+            // just add the data to the bottom of the file
+            if (!isReplace) {
+                newFile = newFile + (label + ":" + encrypt(newPassword, privateKey) + "\n");
+            }
+            FileWriter writer = new FileWriter("password.txt",false);
+            writer.write(newFile);
+            writer.close();
+            return true;
+            
+        } catch (Exception e) {
+        }
+        return false;
+    }
+    
 }
